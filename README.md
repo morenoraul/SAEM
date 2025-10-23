@@ -312,6 +312,64 @@ pytest tests/ --cov=backend --cov=frontend --cov-report=html
 - [ ] Mobile App nativa
 
 ---
+## 🎯 Impacto Esperado
+
+> **Reducción del 25% en deserción estudiantil** mediante detección temprana automatizada y alertas proactivas
+
+
+---
+# 🎭  Demostraciones Interactivas
+
+En el directorio frontend/demos contiene simulaciones interactivas de cada módulo del sistema SAEM para propósitos de:
+- 🎓 Presentaciones académicas
+- 🧪 Testing de UI/UX
+- 📚 Capacitación de usuarios
+- 🎯 Validación de requerimientos
+
+## 📑 Archivos Disponibles
+
+| Archivo | Descripción | Funcionalidad |
+|---------|-------------|---------------|
+| `demo_carga.html` | Simulación de carga CSV | Drag & drop, validación, estadísticas |
+| `demo_clustering.html` | Análisis K-means | Configuración K, métricas, gráficos |
+| `demo_alertas.html` | Sistema de alertas | Umbrales, detección, recomendaciones |
+| `demo_reportes.html` | Exportación de datos | Tipos de reporte, descarga CSV |
+| `demo_completo.html` | Dashboard integrado | Navegación completa entre módulos |
+
+## 🚀 Uso
+
+### Abrir localmente:
+```bash
+cd frontend/demos
+# Abrir con navegador
+firefox demo_completo.html
+# O con servidor HTTP
+python -m http.server 8080
+```
+
+### Servir con Flask (desde raíz del proyecto):
+```python
+# app.py
+@app.route('/demos/<path:filename>')
+def serve_demo(filename):
+    return send_from_directory('frontend/demos', filename)
+```
+
+## ⚠️ Notas Importantes
+
+- ⚡ **No requieren backend**: Todas las demos funcionan standalone
+- 🎨 **Datos simulados**: Utilizan datos ficticios para demostración
+- 📊 **Chart.js incluido**: Vía CDN de Cloudflare
+- 🔒 **No persistencia**: Los datos no se guardan realmente
+
+## 🎯 Casos de Uso
+
+1. **Presentación al cliente**: Mostrar funcionalidades sin instalar backend
+2. **Testing UI**: Validar interacciones antes de integrar con Python
+3. **Documentación**: Screenshots y videos para manuales
+4. **Capacitación**: Entrenar a usuarios sin riesgo de datos reales
+
+---
 
 ## 🤝 Contribución
 
@@ -337,13 +395,6 @@ Actualmente este es un proyecto académico cerrado. Para consultas sobre colabor
 Este proyecto está bajo la Licencia MIT. Ver archivo `LICENSE` para más detalles.
 
 ---
-
-## 🎯 Impacto Esperado
-
-> **Reducción del 25% en deserción estudiantil** mediante detección temprana automatizada y alertas proactivas
-
----
-
 ## 📍 Ubicación
 
 **Instituto Superior del Politecnico Córdoba**  
