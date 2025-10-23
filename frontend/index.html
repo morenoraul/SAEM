@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEM - Sistema de Análisis de Actividad Estudiantil en Moodle</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1>📊 SAEM</h1>
+                <p class="subtitle">Sistema de Análisis de Actividad Estudiantil en Moodle</p>
+            </div>
+            <div class="header-info">
+                <span class="badge">Tecnicatura en Ciencia de Datos e IA</span>
+                <span class="badge">Grupo 3 - 2025</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="navigation">
+        <div class="container">
+            <button class="nav-btn" data-section="alertas">
+                🚨 Alertas
+            </button>
+            <button class="nav-btn" data-section="reportes">
+                📄 Reportes
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            
+            <!-- Sección: Cargar Datos -->
+            <section id="section-carga" class="section active">
+                <h2>📁 Cargar Datos de Moodle</h2>
+                
+                <div class="card">
+                    <h3>Instrucciones</h3>
+                    <ul class="instructions">
+                        <li>El archivo CSV debe contener las siguientes columnas: <code>estudiante_id</code>, <code>actividades_completadas</code>, <code>tiempo_plataforma_horas</code>, <code>entregas_tarde</code>, <code>foros_participacion</code>, <code>calificacion_final</code></li>
+                        <li>Formato de codificación: UTF-8</li>
+                        <li>Mínimo 50 registros de estudiantes</li>
+                        <li>Calificaciones en escala 0-10</li>
+                    </ul>
+                </div>
+
+                <div class="card upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text">Arrastra el archivo CSV aquí o haz clic para seleccionar</p>
+                        <input type="file" id="fileInput" accept=".csv" hidden>
+                        <button class="btn btn-primary" id="selectFileBtn">Seleccionar Archivo CSV</button>
+                    </div>
+                    
+                    <div id="fileInfo" class="file-info" style="display: none;">
+                        <p><strong>Archivo seleccionado:</strong> <span id="fileName"></span></p>
+                        <button class="btn btn-success" id="uploadBtn">Cargar y Procesar</button>
+                    </div>
+                </div>
+
+                <!-- Resumen de datos cargados -->
+                <div id="dataSummary" class="card" style="display: none;">
+                    <h3>✓ Datos Cargados Exitosamente</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalRegistros">0</div>
+                            <div class="stat-label">Total Registros</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalEstudiantes">0</div>
+                            <div class="stat-label">Estudiantes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="promedioActividades">0</div>
+                            <div class="stat-label">Promedio Actividades</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="promedioTiempo">0</div>
+                            <div class="stat-label">Promedio Horas</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Análisis ML -->
+            <section id="section-analisis" class="section">
+                <h2>🤖 Análisis con Machine Learning</h2>
+
+                <!-- Clustering K-means -->
+                <div class="card">
+                    <h3>Clustering K-means</h3>
+                    <p>Segmentación automática de estudiantes en grupos según patrones de actividad</p>
+                    
+                    <div class="form-group">
+                        <label for="kClusters">Número de Clusters (K):</label>
+                        <input type="number" id="kClusters" min="2" max="10" value="3">
+                        <span class="help-text">Recomendado: 3 (Alto, Medio, Bajo rendimiento)</span>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="runClusteringBtn" disabled>
+                        Ejecutar Clustering
+                    </button>
+                    
+                    <div id="clusteringResults" class="results-section" style="display: none;">
+                        <h4>Resultados del Clustering</h4>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">Silhouette Score</div>
+                                <div class="metric-value" id="silhouetteScore">0.00</div>
+                                <div class="metric-quality" id="silhouetteQuality"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Inercia</div>
+                                <div class="metric-value" id="inertiaValue">0</div>
+                            </div>
+                        </div>
+                        
+                        <div id="clusterDistribution" class="distribution-section"></div>
+                    </div>
+                </div>
+
+                <!-- Regresión Lineal -->
+                <div class="card">
+                    <h3>Regresión Lineal - Predicción de Calificaciones</h3>
+                    <p>Predice calificaciones finales basándose en patrones de actividad</p>
+                    
+                    <button class="btn btn-primary" id="runRegressionBtn" disabled>
+                        Entrenar Modelo de Predicción
+                    </button>
+                    
+                    <div id="regressionResults" class="results-section" style="display: none;">
+                        <h4>Métricas del Modelo</h4>
+                        <div class="metrics-grid">
+                            <div class="metric-card">
+                                <div class="metric-label">R² Score</div>
+                                <div class="metric-value" id="r2Score">0.00</div>
+                                <div class="metric-quality" id="r2Quality"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">MAE</div>
+                                <div class="metric-value" id="maeValue">0.00</div>
+                                <div class="metric-quality" id="maeQuality"></div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">RMSE</div>
+                                <div class="metric-value" id="rmseValue">0.00</div>
+                                <div class="metric-quality" id="rmseQuality"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección: Visualizaciones -->
+            <section id="section-visualizaciones" class="section">
+                <h2>📈 Visualizaciones Interactivas</h2>
+
+                <div class="card">
+                    <h3>Distribución de Clusters</h3>
+                    <canvas id="clusterChart" height="100"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3>Dispersión: Actividades vs Tiempo en Plataforma</h3>
+                    <canvas id="scatterChart" height="100"></canvas>
+                </div>
+
+                <div class="card">
+                    <h3>Distribución de Actividades Completadas</h3>
+                    <canvas id="distributionChart" height="100"></canvas>
+                </div>
+            </section>
+
+            <!-- Sección: Alertas -->
+            <section id="section-alertas" class="section">
+                <h2>🚨 Sistema de Alertas - Estudiantes en Riesgo</h2>
+
+                <div class="card">
+                    <h3>Configurar Umbrales de Riesgo</h3>
+                    <div class="thresholds-grid">
+                        <div class="form-group">
+                            <label for="thresholdActividades">Actividades Mínimas:</label>
+                            <input type="number" id="thresholdActividades" value="15" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="thresholdTiempo">Tiempo Mínimo (horas):</label>
+                            <input type="number" id="thresholdTiempo" value="20" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="thresholdEntregas">Máx. Entregas Tardías:</label>
+                            <input type="number" id="thresholdEntregas" value="5" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="thresholdForos">Participación Foros Mín.:</label>
+                            <input type="number" id="thresholdForos" value="3" min="0">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" id="detectAlertsBtn" disabled>
+                        Detectar Estudiantes en Riesgo
+                    </button>
+                </div>
+
+                <div id="alertsResults" class="card" style="display: none;">
+                    <h3>Resultados de Detección</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card alert-critical">
+                            <div class="stat-value" id="alertsCritico">0</div>
+                            <div class="stat-label">🔴 Riesgo Crítico</div>
+                        </div>
+                        <div class="stat-card alert-medium">
+                            <div class="stat-value" id="alertsMedio">0</div>
+                            <div class="stat-label">🟡 Riesgo Medio</div>
+                        </div>
+                        <div class="stat-card alert-low">
+                            <div class="stat-value" id="alertsBajo">0</div>
+                            <div class="stat-label">🟢 Riesgo Bajo</div>
+                        </div>
+                    </div>
+
+                    <div class="alerts-list" id="alertsList"></div>
+                </div>
+            </section>
+
+            <!-- Sección: Reportes -->
+            <section id="section-reportes" class="section">
+                <h2>📄 Exportar Reportes</h2>
+
+                <div class="card">
+                    <h3>Generar Reporte Completo</h3>
+                    <p>Exporta todos los análisis, predicciones y alertas en formato CSV</p>
+                    
+                    <button class="btn btn-success" id="exportReportBtn" disabled>
+                        📥 Descargar Reporte CSV
+                    </button>
+                </div>
+
+                <div class="card">
+                    <h3>Estadísticas del Sistema</h3>
+                    <div id="systemStats" class="stats-display"></div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p><strong>SAEM v1.0.0</strong> - Sistema de Análisis de Actividad Estudiantil en Moodle</p>
+            <p>Desarrollado por: García, Carlos | Moreno, Raúl</p>
+            <p>Tecnicatura Superior en Ciencias de Datos e Inteligencia Artificial - Cohorte 2024</p>
+            <p>Instituto Superior de Formación Técnica - Córdoba, Argentina</p>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+        <p id="loadingText">Procesando...</p>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html> active" data-section="carga">
+                📁 Cargar Datos
+            </button>
+            <button class="nav-btn" data-section="analisis">
+                🤖 Análisis ML
+            </button>
+            <button class="nav-btn" data-section="visualizaciones">
+                📈 Visualizaciones
+            </button>
+            <button class="nav-btn

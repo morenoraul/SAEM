@@ -1,0 +1,22 @@
+# SAEM - Sistema de Análisis de Actividad Estudiantil en Moodle
+# Dependencias del Proyecto
+
+# Framework Web
+Flask==3.0.0
+Flask-CORS==4.0.0
+Werkzeug==3.0.1
+
+# Machine Learning
+scikit-learn>=1.3.0
+numpy>=1.24.0
+pandas>=1.5.0
+scipy>=1.11.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-mock>=3.12.0
+
+# Utilidades
+python-dateutil>=2.8.2
+pytz>=2023.3
