@@ -313,8 +313,8 @@ pytest tests/ --cov=backend --cov=frontend --cov-report=html
 Actualmente este es un proyecto académico cerrado. Para consultas sobre colaboración:
 
 📧 **Contacto:**
-- García, Carlos: garcia.carlos@estudiante.edu.ar
-- Moreno, Raúl: moreno.raul@estudiante.edu.ar
+- García, Carlos
+- Moreno, Raúl
 
 ---
 
