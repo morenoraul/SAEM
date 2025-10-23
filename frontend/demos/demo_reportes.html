@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEM - Reportes</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--success-color);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .report-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .report-option {
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .report-option:hover {
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 4px 8px rgba(37, 99, 235, 0.1);
+        }
+
+        .report-option.selected {
+            border-color: var(--primary-color);
+            background: rgba(37, 99, 235, 0.05);
+        }
+
+        .report-option h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .report-option p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-item {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .stat-item h4 {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item .value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(37, 99, 235, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #059669;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .file-preview {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.875rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .badge.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📄 Exportar Reportes</h1>
+            <p>Genera reportes completos con todos los análisis realizados</p>
+        </div>
+
+        <div class="card">
+            <h3>Seleccionar Tipo de Reporte</h3>
+            <p>Elige qué información incluir en el reporte exportado</p>
+            
+            <div class="report-options">
+                <div class="report-option selected" data-type="completo">
+                    <h4>📊 Reporte Completo</h4>
+                    <p>Incluye todos los análisis, clustering, predicciones y alertas</p>
+                </div>
+                <div class="report-option" data-type="clustering">
+                    <h4>🎯 Solo Clustering</h4>
+                    <p>Segmentación de estudiantes y distribución de clusters</p>
+                </div>
+                <div class="report-option" data-type="alertas">
+                    <h4>🚨 Solo Alertas</h4>
+                    <p>Estudiantes en riesgo y recomendaciones</p>
+                </div>
+                <div class="report-option" data-type="predicciones">
+                    <h4>📈 Solo Predicciones</h4>
+                    <p>Calificaciones predichas y métricas del modelo</p>
+                </div>
+            </div>
+            
+            <button class="btn" id="exportBtn">
+                <span>📥</span> Descargar Reporte CSV
+            </button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Generando reporte...</p>
+            </div>
+
+            <div id="successMessage" class="success-message">
+                ✓ Reporte generado y descargado exitosamente
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Estadísticas del Sistema</h3>
+            <div class="stats-display">
+                <div class="stat-item">
+                    <h4>Análisis Realizados</h4>
+                    <div class="value" id="statAnalisis">0</div>
+                </div>
+                <div class="stat-item">
+                    <h4>Estudiantes Analizados</h4>
+                    <div class="value" id="statEstudiantes">0</div>
+                </div>
+                <div class="stat-item">
+                    <h4>Alertas Generadas</h4>
+                    <div class="value" id="statAlertas">0</div>
+                </div>
+                <div class="stat-item">
+                    <h4>Reportes Exportados</h4>
+                    <div class="value" id="statReportes">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Información del Reporte</h3>
+            <p><strong>Formato:</strong> CSV (valores separados por comas) <span class="badge info">UTF-8</span></p>
+            <p><strong>Compatible con:</strong> Excel, Google Sheets, LibreOffice Calc</p>
+            <p style="margin-top: 1rem;"><strong>Contenido incluido:</strong></p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>ID de estudiante</li>
+                <li>Cluster asignado y perfil</li>
+                <li>Calificación predicha vs real</li>
+                <li>Nivel de riesgo y recomendaciones</li>
+                <li>Métricas de actividad completas</li>
+                <li>Fecha y hora de generación</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = 'completo';
+        let reportCount = 0;
+
+        // Selección de tipo de reporte
+        document.querySelectorAll('.report-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.report-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selectedType = option.dataset.type;
+            });
+        });
+
+        // Exportar reporte
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('exportBtn').style.display = 'none';
+
+            setTimeout(() => {
+                generateReport();
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('exportBtn').style.display = 'inline-flex';
+                document.getElementById('successMessage').classList.add('show');
+                
+                reportCount++;
+                document.getElementById('statReportes').textContent = reportCount;
+
+                setTimeout(() => {
+                    document.getElementById('successMessage').classList.remove('show');
+                }, 3000);
+            }, 2000);
+        });
+
+        function generateReport() {
+            let csvContent = '';
+            
+            if (selectedType === 'completo') {
+                csvContent = `estudiante_id,cluster,perfil,actividades,tiempo_horas,entregas_tarde,foros,calif_real,calif_predicha,nivel_riesgo,recomendacion
+EST-1001,0,Bajo Rendimiento,12,18.5,8,1,4.2,4.5,critico,Intervención urgente
+EST-1002,1,Rendimiento Medio,24,42.3,3,5,6.8,7.1,bajo,Seguimiento regular
+EST-1003,2,Alto Rendimiento,42,68.5,0,12,9.5,9.2,bajo,Mantener motivación
+EST-1004,0,Bajo Rendimiento,10,15.2,9,0,3.8,4.1,critico,Contacto inmediato
+EST-1005,1,Rendimiento Medio,26,45.1,4,6,7.2,7.4,medio,Reforzar participación`;
+            } else if (selectedType === 'clustering') {
+                csvContent = `estudiante_id,cluster,perfil,actividades,tiempo_horas,entregas_tarde,foros
+EST-1001,0,Bajo Rendimiento,12,18.5,8,1
+EST-1002,1,Rendimiento Medio,24,42.3,3,5
+EST-1003,2,Alto Rendimiento,42,68.5,0,12`;
+            } else if (selectedType === 'alertas') {
+                csvContent = `estudiante_id,nivel_riesgo,puntos_riesgo,criterios_incumplidos,recomendacion
+EST-1001,critico,4,Actividades-Tiempo-Entregas-Foros,Intervención urgente y apoyo personalizado
+EST-1004,critico,3,Actividades-Tiempo-Entregas,Contacto inmediato con tutor
+EST-1007,medio,2,Tiempo-Foros,Motivar mayor participación
+EST-1012,bajo,1,Foros,Observación continua`;
+            } else if (selectedType === 'predicciones') {
+                csvContent = `estudiante_id,calificacion_real,calificacion_predicha,diferencia,precision
+EST-1001,4.2,4.5,0.3,93%
+EST-1002,6.8,7.1,0.3,96%
+EST-1003,9.5,9.2,-0.3,97%
+EST-1004,3.8,4.1,0.3,92%
+EST-1005,7.2,7.4,0.2,97%`;
+            }
+
+            // Crear y descargar archivo
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fecha = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `reporte_saem_${selectedType}_${fecha}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Animar estadísticas al cargar
+        window.addEventListener('load', () => {
+            animateValue('statAnalisis', 0, 3, 1500);
+            animateValue('statEstudiantes', 0, 150, 1500);
+            animateValue('statAlertas', 0, 53, 1500);
+        });
+
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+    </script>
+</body>
+</html>

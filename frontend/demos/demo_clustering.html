@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEM - Clustering</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 200px;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(37, 99, 235, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .metric-card {
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-quality {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            display: inline-block;
+        }
+
+        .quality-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .quality-good {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .cluster-card {
+            background: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cluster-card h4 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .cluster-card ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .cluster-card li {
+            margin: 0.25rem 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Análisis ML - Clustering K-means</h1>
+            <p>Segmentación automática de estudiantes según patrones de actividad</p>
+        </div>
+
+        <div class="card">
+            <h3>Configuración del Clustering</h3>
+            <p>Agrupa a los estudiantes en clusters según su comportamiento y actividad en la plataforma</p>
+            
+            <div class="form-group">
+                <label for="kClusters">Número de Clusters (K):</label>
+                <input type="number" id="kClusters" min="2" max="10" value="3">
+                <div class="help-text">Recomendado: 3 (Alto, Medio, Bajo rendimiento)</div>
+            </div>
+            
+            <button class="btn" id="runBtn">Ejecutar Clustering</button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Ejecutando algoritmo K-means...</p>
+            </div>
+        </div>
+
+        <div id="results" class="card results">
+            <h3>Resultados del Clustering</h3>
+            
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Silhouette Score</div>
+                    <div class="metric-value" id="silhouetteScore">0.00</div>
+                    <div class="metric-quality quality-excellent" id="silhouetteQuality"></div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Inercia</div>
+                    <div class="metric-value" id="inertiaValue">0</div>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <canvas id="clusterChart"></canvas>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Distribución de Clusters</h3>
+            <div id="clusterDistribution"></div>
+        </div>
+    </div>
+
+    <script>
+        let clusterChart = null;
+
+        document.getElementById('runBtn').addEventListener('click', () => {
+            const k = parseInt(document.getElementById('kClusters').value);
+            
+            if (k < 2 || k > 10) {
+                alert('K debe estar entre 2 y 10');
+                return;
+            }
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('runBtn').style.display = 'none';
+
+            // Simular procesamiento
+            setTimeout(() => {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('results').classList.add('show');
+
+                // Datos simulados
+                const silhouette = 0.653;
+                const inertia = 2847.32;
+
+                animateValue('silhouetteScore', 0, silhouette, 1000, 3);
+                animateValue('inertiaValue', 0, inertia, 1000, 2);
+
+                document.getElementById('silhouetteQuality').textContent = 'Excelente';
+
+                // Crear distribución de clusters
+                createClusterDistribution(k);
+                createChart(k);
+            }, 2500);
+        });
+
+        function createClusterDistribution(k) {
+            const container = document.getElementById('clusterDistribution');
+            container.innerHTML = '';
+
+            const clusters = [
+                {
+                    perfil: '🔴 Bajo Rendimiento',
+                    descripcion: 'Estudiantes con baja participación y actividad en la plataforma',
+                    cantidad: 45,
+                    porcentaje: 30,
+                    actividades: 12.3,
+                    tiempo: 18.7,
+                    entregas: 8.2,
+                    foros: 1.5,
+                    recomendacion: 'Intervención urgente. Contacto directo con tutores y apoyo personalizado.'
+                },
+                {
+                    perfil: '🟡 Rendimiento Medio',
+                    descripcion: 'Estudiantes con participación moderada y resultados aceptables',
+                    cantidad: 68,
+                    porcentaje: 45.3,
+                    actividades: 24.1,
+                    tiempo: 42.3,
+                    entregas: 3.4,
+                    foros: 5.2,
+                    recomendacion: 'Seguimiento regular. Motivar mayor participación en foros y actividades.'
+                },
+                {
+                    perfil: '🟢 Alto Rendimiento',
+                    descripcion: 'Estudiantes muy activos con excelente compromiso',
+                    cantidad: 37,
+                    porcentaje: 24.7,
+                    actividades: 41.8,
+                    tiempo: 68.5,
+                    entregas: 0.8,
+                    foros: 12.3,
+                    recomendacion: 'Mantener motivación. Ofrecer contenido adicional o roles de liderazgo.'
+                }
+            ];
+
+            clusters.slice(0, k).forEach(cluster => {
+                const div = document.createElement('div');
+                div.className = 'cluster-card';
+                div.innerHTML = `
+                    <h4>${cluster.perfil}</h4>
+                    <p><strong>Descripción:</strong> ${cluster.descripcion}</p>
+                    <p><strong>Cantidad de estudiantes:</strong> ${cluster.cantidad} (${cluster.porcentaje}%)</p>
+                    <p><strong>Características promedio:</strong></p>
+                    <ul>
+                        <li>Actividades: ${cluster.actividades}</li>
+                        <li>Tiempo en plataforma: ${cluster.tiempo} horas</li>
+                        <li>Entregas tarde: ${cluster.entregas}</li>
+                        <li>Participación foros: ${cluster.foros}</li>
+                    </ul>
+                    <p><strong>Recomendación:</strong> ${cluster.recomendacion}</p>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function createChart(k) {
+            const ctx = document.getElementById('clusterChart').getContext('2d');
+            
+            if (clusterChart) {
+                clusterChart.destroy();
+            }
+
+            const data = k === 3 ? [45, 68, 37] : k === 2 ? [75, 75] : [30, 45, 40, 35];
+            const labels = Array.from({length: k}, (_, i) => `Cluster ${i + 1}`);
+            const colors = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+
+            clusterChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.slice(0, k),
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Distribución de Estudiantes por Cluster'
+                        }
+                    }
+                }
+            });
+        }
+
+        function animateValue(id, start, end, duration, decimals = 0) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = decimals > 0 ? current.toFixed(decimals) : Math.floor(current);
+            }, 16);
+        }
+    </script>
+</body>
+</html>

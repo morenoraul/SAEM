@@ -3,7 +3,7 @@ SAEM - Sistema de Análisis de Actividad Estudiantil en Moodle
 Aplicación principal Flask
 """
 
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 import pandas as pd
 import numpy as np
@@ -33,10 +33,54 @@ current_data = None
 clustering_results = None
 regression_results = None
 
+# ========== RUTAS PRINCIPALES ==========
+
 @app.route('/')
 def index():
     """Ruta principal - Página de inicio"""
     return render_template('index.html')
+
+# ========== RUTAS PARA DEMOS (NUEVAS) ==========
+
+@app.route('/demos/')
+@app.route('/demos/<path:filename>')
+def serve_demos(filename='demo_completo.html'):
+    """
+    Sirve las páginas de demostración interactivas
+    
+    Ejemplos de uso:
+    - http://localhost:5000/demos/
+    - http://localhost:5000/demos/demo_carga.html
+    - http://localhost:5000/demos/demo_clustering.html
+    - http://localhost:5000/demos/demo_alertas.html
+    - http://localhost:5000/demos/demo_reportes.html
+    - http://localhost:5000/demos/demo_completo.html
+    """
+    try:
+        return send_from_directory('frontend/demos', filename)
+    except Exception as e:
+        return jsonify({
+            'error': f'Demo no encontrada: {filename}',
+            'demos_disponibles': [
+                'demo_carga.html',
+                'demo_clustering.html',
+                'demo_alertas.html',
+                'demo_reportes.html',
+                'demo_completo.html'
+            ]
+        }), 404
+
+@app.route('/demos/assets/<path:filename>')
+def serve_demo_assets(filename):
+    """
+    Sirve archivos estáticos de las demos (CSS, JS, imágenes)
+    """
+    try:
+        return send_from_directory('frontend/demos/assets', filename)
+    except Exception as e:
+        return jsonify({'error': f'Asset no encontrado: {filename}'}), 404
+
+# ========== API ENDPOINTS ==========
 
 @app.route('/api/upload', methods=['POST'])
 def upload_file():
@@ -260,11 +304,15 @@ def detect_alerts():
             'error': f'Error al detectar alertas: {str(e)}'
         }), 500
 
+# ========== VISUALIZACIONES (COMENTADO - No usado en MVP) ==========
+"""
 @app.route('/api/visualizations', methods=['GET'])
 def get_visualizations():
-    """
+    '''
     Endpoint para obtener datos de visualizaciones
-    """
+    NOTA: Actualmente las visualizaciones se generan en frontend con Chart.js
+    Este endpoint queda disponible para futuras implementaciones backend
+    '''
     try:
         global current_data, clustering_results
         
@@ -301,6 +349,7 @@ def get_visualizations():
         return jsonify({
             'error': f'Error al generar visualizaciones: {str(e)}'
         }), 500
+"""
 
 @app.route('/api/export', methods=['POST'])
 def export_report():
@@ -378,16 +427,73 @@ def get_statistics():
             'error': f'Error al obtener estadísticas: {str(e)}'
         }), 500
 
+# ========== HEALTH CHECK (COMENTADO - Útil para producción) ==========
+"""
+@app.route('/health', methods=['GET'])
+def health_check():
+    '''
+    Endpoint de health check para monitoreo
+    Útil en ambientes de producción con Docker/Kubernetes
+    '''
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.now().isoformat(),
+        'version': '1.0.0',
+        'components': {
+            'data_processor': data_processor is not None,
+            'clustering': clustering_analyzer is not None,
+            'regression': regression_predictor is not None,
+            'alerts': alert_system is not None
+        }
+    }), 200
+"""
+
+# ========== MANEJO DE ERRORES ==========
+
+@app.errorhandler(404)
+def not_found(error):
+    """Manejo de error 404 - Página no encontrada"""
+    return jsonify({
+        'error': 'Recurso no encontrado',
+        'rutas_disponibles': [
+            '/',
+            '/demos/',
+            '/api/upload',
+            '/api/clustering',
+            '/api/prediction',
+            '/api/alerts',
+            '/api/export',
+            '/api/statistics'
+        ]
+    }), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    """Manejo de error 500 - Error interno del servidor"""
+    return jsonify({
+        'error': 'Error interno del servidor',
+        'message': 'Por favor, contacte al administrador del sistema'
+    }), 500
+
+
+# ========== INICIO DE LA APLICACIÓN ==========
 
 if __name__ == '__main__':
     print("=" * 60)
     print("🚀 SAEM - Sistema de Análisis de Actividad Estudiantil")
     print("=" * 60)
     print("\n✓ Servidor iniciado")
+    print("✓ Aplicación principal: http://localhost:5000")
+    print("✓ Demos interactivas: http://localhost:5000/demos/")
     print("✓ Documentación: docs/manual_usuario.pdf")
     print("✓ Desarrollado por: García, Carlos | Moreno, Raúl")
+    print("\n📋 Demos disponibles:")
+    print("   - http://localhost:5000/demos/demo_carga.html")
+    print("   - http://localhost:5000/demos/demo_clustering.html")
+    print("   - http://localhost:5000/demos/demo_alertas.html")
+    print("   - http://localhost:5000/demos/demo_reportes.html")
+    print("   - http://localhost:5000/demos/demo_completo.html")
     print("\n" + "=" * 60)
 
     port = int(os.environ.get("PORT", 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
-#    app.run(debug=True, host='0.0.0.0', port=5000)

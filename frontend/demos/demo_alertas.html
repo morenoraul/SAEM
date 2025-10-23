@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAEM - Alertas</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e5e7eb;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --light-bg: #f9fafb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--danger-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .thresholds-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(37, 99, 235, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-card.critical {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .stat-card.medium {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .stat-card.low {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .alert-item {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-item.critico {
+            border-left-color: var(--danger-color);
+        }
+
+        .alert-item.medio {
+            border-left-color: var(--warning-color);
+        }
+
+        .alert-item.bajo {
+            border-left-color: var(--success-color);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .alert-student-id {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .alert-level {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .alert-level.critico {
+            background: var(--danger-color);
+        }
+
+        .alert-level.medio {
+            background: var(--warning-color);
+        }
+
+        .alert-level.bajo {
+            background: var(--success-color);
+        }
+
+        .alert-criteria {
+            margin: 1rem 0;
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .criteria-item {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .alert-recommendations {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .recommendation {
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+        }
+
+        .recommendation::before {
+            content: "• ";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Sistema de Alertas - Estudiantes en Riesgo</h1>
+            <p>Identificación temprana de estudiantes que requieren intervención</p>
+        </div>
+
+        <div class="card">
+            <h3>Configurar Umbrales de Riesgo</h3>
+            <p>Define los valores mínimos esperados para cada métrica</p>
+            
+            <div class="thresholds-grid">
+                <div class="form-group">
+                    <label for="thresholdActividades">Actividades Mínimas:</label>
+                    <input type="number" id="thresholdActividades" value="15" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="thresholdTiempo">Tiempo Mínimo (horas):</label>
+                    <input type="number" id="thresholdTiempo" value="20" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="thresholdEntregas">Máx. Entregas Tardías:</label>
+                    <input type="number" id="thresholdEntregas" value="5" min="0">
+                </div>
+                <div class="form-group">
+                    <label for="thresholdForos">Participación Foros Mín.:</label>
+                    <input type="number" id="thresholdForos" value="3" min="0">
+                </div>
+            </div>
+            
+            <button class="btn" id="detectBtn">Detectar Estudiantes en Riesgo</button>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Analizando estudiantes...</p>
+            </div>
+        </div>
+
+        <div id="results" class="card results">
+            <h3>Resultados de Detección</h3>
+            
+            <div class="stats-grid">
+                <div class="stat-card critical">
+                    <div class="stat-value" id="alertsCritico">0</div>
+                    <div class="stat-label">🔴 Riesgo Crítico</div>
+                </div>
+                <div class="stat-card medium">
+                    <div class="stat-value" id="alertsMedio">0</div>
+                    <div class="stat-label">🟡 Riesgo Medio</div>
+                </div>
+                <div class="stat-card low">
+                    <div class="stat-value" id="alertsBajo">0</div>
+                    <div class="stat-label">🟢 Riesgo Bajo</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 2rem;">Listado de Estudiantes en Riesgo</h3>
+            <div id="alertsList"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('detectBtn').addEventListener('click', () => {
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('detectBtn').style.display = 'none';
+
+            setTimeout(() => {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('results').classList.add('show');
+
+                animateValue('alertsCritico', 0, 12, 1000);
+                animateValue('alertsMedio', 0, 23, 1000);
+                animateValue('alertsBajo', 0, 18, 1000);
+
+                displayAlerts();
+            }, 2000);
+        });
+
+        function displayAlerts() {
+            const alertsList = document.getElementById('alertsList');
+            alertsList.innerHTML = '';
+
+            const alerts = [
+                {
+                    id: 'EST-1047',
+                    nivel: 'critico',
+                    puntos: 4,
+                    criterios: [
+                        { criterio: 'Actividades completadas', actual: 8, esperado: 15 },
+                        { criterio: 'Tiempo en plataforma', actual: 12.3, esperado: 20 },
+                        { criterio: 'Entregas tarde', actual: 9, esperado: '≤5' },
+                        { criterio: 'Participación foros', actual: 0, esperado: 3 }
+                    ],
+                    recomendaciones: [
+                        'Contacto urgente con el estudiante y tutor académico',
+                        'Evaluar posibles dificultades personales o técnicas',
+                        'Ofrecer sesión de apoyo personalizado',
+                        'Considerar plan de recuperación académica'
+                    ]
+                },
+                {
+                    id: 'EST-2134',
+                    nivel: 'critico',
+                    puntos: 3,
+                    criterios: [
+                        { criterio: 'Actividades completadas', actual: 10, esperado: 15 },
+                        { criterio: 'Tiempo en plataforma', actual: 15.7, esperado: 20 },
+                        { criterio: 'Entregas tarde', actual: 7, esperado: '≤5' }
+                    ],
+                    recomendaciones: [
+                        'Enviar notificación inmediata',
+                        'Programar reunión con tutor',
+                        'Revisar acceso y conectividad'
+                    ]
+                },
+                {
+                    id: 'EST-3421',
+                    nivel: 'medio',
+                    puntos: 2,
+                    criterios: [
+                        { criterio: 'Tiempo en plataforma', actual: 17.5, esperado: 20 },
+                        { criterio: 'Participación foros', actual: 1, esperado: 3 }
+                    ],
+                    recomendaciones: [
+                        'Motivar mayor participación en foros',
+                        'Enviar recordatorios de actividades pendientes',
+                        'Monitorear progreso semanal'
+                    ]
+                },
+                {
+                    id: 'EST-4892',
+                    nivel: 'medio',
+                    puntos: 2,
+                    criterios: [
+                        { criterio: 'Actividades completadas', actual: 13, esperado: 15 },
+                        { criterio: 'Entregas tarde', actual: 6, esperado: '≤5' }
+                    ],
+                    recomendaciones: [
+                        'Reforzar gestión del tiempo',
+                        'Proporcionar calendario de entregas',
+                        'Seguimiento quincenal'
+                    ]
+                },
+                {
+                    id: 'EST-5673',
+                    nivel: 'bajo',
+                    puntos: 1,
+                    criterios: [
+                        { criterio: 'Participación foros', actual: 2, esperado: 3 }
+                    ],
+                    recomendaciones: [
+                        'Incentivar participación en discusiones',
+                        'Observación continua sin intervención urgente'
+                    ]
+                }
+            ];
+
+            alerts.forEach((alert, index) => {
+                setTimeout(() => {
+                    const div = document.createElement('div');
+                    div.className = `alert-item ${alert.nivel}`;
+                    div.style.opacity = '0';
+                    div.style.transform = 'translateY(20px)';
+                    
+                    let criteriosHTML = alert.criterios.map(c => `
+                        <div class="criteria-item">
+                            <strong>${c.criterio}:</strong> 
+                            Actual: ${c.actual} | Esperado: ${c.esperado}
+                        </div>
+                    `).join('');
+                    
+                    let recomendacionesHTML = alert.recomendaciones.map(r => `
+                        <div class="recommendation">${r}</div>
+                    `).join('');
+                    
+                    div.innerHTML = `
+                        <div class="alert-header">
+                            <span class="alert-student-id">Estudiante: ${alert.id}</span>
+                            <span class="alert-level ${alert.nivel}">
+                                ${alert.nivel === 'critico' ? '🔴' : alert.nivel === 'medio' ? '🟡' : '🟢'} 
+                                ${alert.nivel.toUpperCase()}
+                            </span>
+                        </div>
+                        <p><strong>Puntos de Riesgo:</strong> ${alert.puntos}</p>
+                        <p><strong>Criterios Incumplidos (${alert.criterios.length}):</strong></p>
+                        <div class="alert-criteria">${criteriosHTML}</div>
+                        <div class="alert-recommendations">
+                            <strong>Recomendaciones:</strong>
+                            ${recomendacionesHTML}
+                        </div>
+                        <p style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 1rem;">
+                            Detectado: ${new Date().toLocaleString('es-AR')}
+                        </p>
+                    `;
+                    
+                    alertsList.appendChild(div);
+                    
+                    setTimeout(() => {
+                        div.style.transition = 'all 0.3s ease';
+                        div.style.opacity = '1';
+                        div.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 200);
+            });
+        }
+
+        function animateValue(id, start, end, duration) {
+            const element = document.getElementById(id);
+            const range = end - start;
+            const increment = range / (duration / 16);
+            let current = start;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= end) {
+                    current = end;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.floor(current);
+            }, 16);
+        }
+    </script>
+</body>
+</html>
