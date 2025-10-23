@@ -135,28 +135,33 @@ EST002,12,35,15,1,4.2
 
 ```
 saem/
-├── app.py                 # Punto de entrada de la aplicación
+├── app.py                 
 ├── backend/
-│   ├── clustering.py      # Algoritmo K-means
-│   ├── regression.py      # Modelo regresión lineal
-│   ├── data_processor.py  # Procesamiento CSV
-│   └── alerts.py          # Sistema de alertas
+│   ├── clustering.py      
+│   ├── regression.py      
+│   ├── data_processor.py  
+│   └── alerts.py          
 ├── frontend/
-│   ├── index.html         # Interfaz principal
-│   ├── styles.css         # Estilos responsive
-│   └── dashboard.js       # Visualizaciones Chart.js
+│   ├── index.html         # Dashboard principal (integrado)
+│   ├── styles.css         
+│   ├── dashboard.js       
+│   └── demos/             # 👈 NUEVA CARPETA PARA SIMULACIONES
+│       ├── README.md      # Documentación de demos
+│       ├── demo_carga.html
+│       ├── demo_clustering.html
+│       ├── demo_alertas.html
+│       ├── demo_reportes.html
+│       └── assets/
+│           ├── styles_demo.css
+│           └── scripts_demo.js
 ├── tests/
-│   ├── test_clustering.py
-│   ├── test_regression.py
-│   ├── test_integration.py
-│   └── test_security.py
 ├── data/
-│   ├── sample_dataset.csv # Dataset sintético de ejemplo
-│   └── schema.json        # Esquema de datos
 ├── docs/
 │   ├── manual_usuario.pdf
 │   ├── especificaciones_tecnicas.pdf
-│   └── poster_ABP.pdf
+│   ├── poster_ABP.pdf
+│   └── demos/             # 👈 ALTERNATIVA: Demos en docs
+│       └── [archivos de demostración]
 ├── requirements.txt
 ├── pytest.ini
 └── README.md
