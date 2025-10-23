@@ -63,7 +63,7 @@ SAEM es una aplicación web que utiliza algoritmos de Machine Learning para iden
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/grupo3-saem-2024/saem.git
+git clone https://github.com/morenoraul/saem.git
 cd saem
 
 # Crear entorno virtual
