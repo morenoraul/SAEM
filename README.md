@@ -33,7 +33,7 @@ SAEM es una aplicación web que utiliza algoritmos de Machine Learning para iden
 **Módulos:** Gerencia de Proyectos | Testeo de Software  
 **Docentes:** Ana Farías | Carolina Ahumada  
 **Integrantes:** García, Carlos | Moreno, Raúl  
-**Período:** Marzo - Septiembre 2025 (14 semanas)
+**Período:** Agosto - Diciembre 2025 (14 semanas)
 
 ---
 
