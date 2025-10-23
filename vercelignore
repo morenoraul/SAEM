@@ -1,0 +1,15 @@
+
+data/
+docs/
+*.pdf
+*.csv
+*.xlsx
+*.xls
+*.zip
+*.tar.gz
+*.pkl
+*.h5
+__pycache__/
+*.log
+*.tmp
+*.md
