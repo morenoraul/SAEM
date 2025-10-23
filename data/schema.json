@@ -1,0 +1,679 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://saem.edu.ar/schemas/moodle-activity-log.json",
+  "title": "SAEM - Esquema de Logs de Actividad Moodle",
+  "description": "Esquema de validación para archivos CSV de actividad estudiantil en plataforma Moodle",
+  "version": "1.0.0",
+  "type": "object",
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "description": "Metadatos del dataset",
+      "properties": {
+        "institucion": {
+          "type": "string",
+          "description": "Nombre de la institución educativa"
+        },
+        "periodo_academico": {
+          "type": "string",
+          "pattern": "^\\d{4}-(1er|2do)-Cuatrimestre$",
+          "description": "Período académico en formato YYYY-{1er|2do}-Cuatrimestre"
+        },
+        "materia": {
+          "type": "string",
+          "description": "Nombre de la materia o curso"
+        },
+        "fecha_generacion": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Fecha y hora de generación del reporte"
+        },
+        "total_estudiantes": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Cantidad total de estudiantes en el dataset"
+        }
+      }
+    },
+    "columnas_requeridas": {
+      "type": "array",
+      "description": "Columnas obligatorias en el archivo CSV",
+      "items": {
+        "type": "string",
+        "enum": [
+          "estudiante_id",
+          "actividades_completadas",
+          "tiempo_plataforma_horas",
+          "entregas_tarde",
+          "foros_participacion",
+          "calificacion_final"
+        ]
+      },
+      "minItems": 6,
+      "uniqueItems": true
+    },
+    "columnas_opcionales": {
+      "type": "array",
+      "description": "Columnas opcionales que pueden incluirse",
+      "items": {
+        "type": "string",
+        "enum": [
+          "timestamp",
+          "course_id",
+          "curso_nombre",
+          "docente_id",
+          "fecha_ultima_actividad",
+          "intentos_evaluacion",
+          "recursos_descargados",
+          "mensajes_enviados",
+          "tareas_completadas",
+          "quizzes_realizados",
+          "asistencia_clases_virtuales"
+        ]
+      }
+    },
+    "definiciones": {
+      "type": "object",
+      "description": "Definiciones de tipos de datos para cada columna",
+      "properties": {
+        "estudiante_id": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "string"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Identificador único del estudiante"
+            },
+            "formato": {
+              "type": "string",
+              "const": "EST seguido de 3 dígitos (ejemplo: EST001)"
+            },
+            "pattern": {
+              "type": "string",
+              "const": "^EST\\d{3,}$"
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "unico": {
+              "type": "boolean",
+              "const": true
+            },
+            "ejemplos": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "const": ["EST001", "EST002", "EST123"]
+            }
+          }
+        },
+        "actividades_completadas": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "integer"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Cantidad de actividades completadas por el estudiante"
+            },
+            "rango": {
+              "type": "object",
+              "properties": {
+                "minimo": {
+                  "type": "integer",
+                  "const": 0
+                },
+                "maximo": {
+                  "type": "integer",
+                  "const": 200
+                }
+              }
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "valores_negativos_permitidos": {
+              "type": "boolean",
+              "const": false
+            },
+            "ejemplos": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "const": [45, 12, 38, 50]
+            }
+          }
+        },
+        "tiempo_plataforma_horas": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "number"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Tiempo total en plataforma Moodle en horas"
+            },
+            "rango": {
+              "type": "object",
+              "properties": {
+                "minimo": {
+                  "type": "number",
+                  "const": 0
+                },
+                "maximo": {
+                  "type": "number",
+                  "const": 500
+                }
+              }
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "decimales_permitidos": {
+              "type": "boolean",
+              "const": true
+            },
+            "precision": {
+              "type": "integer",
+              "const": 2
+            },
+            "ejemplos": {
+              "type": "array",
+              "const": [120, 35.5, 95, 145.25]
+            }
+          }
+        },
+        "entregas_tarde": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "integer"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Cantidad de entregas realizadas después de la fecha límite"
+            },
+            "rango": {
+              "type": "object",
+              "properties": {
+                "minimo": {
+                  "type": "integer",
+                  "const": 0
+                },
+                "maximo": {
+                  "type": "integer",
+                  "const": 50
+                }
+              }
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "valores_negativos_permitidos": {
+              "type": "boolean",
+              "const": false
+            },
+            "ejemplos": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "const": [2, 15, 4, 0]
+            }
+          }
+        },
+        "foros_participacion": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "integer"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Cantidad de participaciones en foros de discusión"
+            },
+            "rango": {
+              "type": "object",
+              "properties": {
+                "minimo": {
+                  "type": "integer",
+                  "const": 0
+                },
+                "maximo": {
+                  "type": "integer",
+                  "const": 100
+                }
+              }
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "valores_negativos_permitidos": {
+              "type": "boolean",
+              "const": false
+            },
+            "ejemplos": {
+              "type": "array",
+              "items": {
+                "type": "integer"
+              },
+              "const": [8, 1, 6, 12]
+            }
+          }
+        },
+        "calificacion_final": {
+          "type": "object",
+          "properties": {
+            "tipo": {
+              "type": "string",
+              "const": "number"
+            },
+            "descripcion": {
+              "type": "string",
+              "const": "Calificación final del estudiante en escala 0-10 (sistema argentino)"
+            },
+            "rango": {
+              "type": "object",
+              "properties": {
+                "minimo": {
+                  "type": "number",
+                  "const": 0.0
+                },
+                "maximo": {
+                  "type": "number",
+                  "const": 10.0
+                }
+              }
+            },
+            "requerido": {
+              "type": "boolean",
+              "const": true
+            },
+            "decimales_permitidos": {
+              "type": "boolean",
+              "const": true
+            },
+            "precision": {
+              "type": "integer",
+              "const": 2
+            },
+            "ejemplos": {
+              "type": "array",
+              "const": [8.5, 4.2, 7.8, 9.2]
+            }
+          }
+        }
+      }
+    },
+    "reglas_validacion": {
+      "type": "object",
+      "description": "Reglas de validación aplicadas al dataset",
+      "properties": {
+        "registros_minimos": {
+          "type": "integer",
+          "const": 50,
+          "description": "Cantidad mínima de registros requeridos para análisis estadístico válido"
+        },
+        "registros_maximos_recomendados": {
+          "type": "integer",
+          "const": 5000,
+          "description": "Cantidad máxima recomendada para performance óptima"
+        },
+        "encoding": {
+          "type": "string",
+          "const": "UTF-8",
+          "description": "Codificación de caracteres requerida"
+        },
+        "separador": {
+          "type": "string",
+          "const": ",",
+          "description": "Separador de columnas en CSV"
+        },
+        "encabezados_requeridos": {
+          "type": "boolean",
+          "const": true,
+          "description": "Primera fila debe contener nombres de columnas"
+        },
+        "valores_nulos_permitidos": {
+          "type": "object",
+          "properties": {
+            "estudiante_id": {
+              "type": "boolean",
+              "const": false
+            },
+            "actividades_completadas": {
+              "type": "boolean",
+              "const": false
+            },
+            "tiempo_plataforma_horas": {
+              "type": "boolean",
+              "const": false
+            },
+            "entregas_tarde": {
+              "type": "boolean",
+              "const": false
+            },
+            "foros_participacion": {
+              "type": "boolean",
+              "const": false
+            },
+            "calificacion_final": {
+              "type": "boolean",
+              "const": false
+            }
+          }
+        },
+        "duplicados_permitidos": {
+          "type": "object",
+          "properties": {
+            "por_estudiante_id": {
+              "type": "boolean",
+              "const": false,
+              "description": "No se permiten estudiantes duplicados"
+            },
+            "por_combinacion_valores": {
+              "type": "boolean",
+              "const": true,
+              "description": "Se permiten valores idénticos en diferentes estudiantes"
+            }
+          }
+        },
+        "fechas_futuras_permitidas": {
+          "type": "boolean",
+          "const": false,
+          "description": "No se permiten timestamps en fechas futuras"
+        }
+      }
+    },
+    "umbrales_riesgo_academico": {
+      "type": "object",
+      "description": "Umbrales por defecto para detección de riesgo académico",
+      "properties": {
+        "actividades_completadas": {
+          "type": "object",
+          "properties": {
+            "critico": {
+              "type": "integer",
+              "const": 10,
+              "description": "Menos de 10 actividades indica riesgo crítico"
+            },
+            "medio": {
+              "type": "integer",
+              "const": 15,
+              "description": "Menos de 15 actividades indica riesgo medio"
+            },
+            "optimo": {
+              "type": "integer",
+              "const": 40,
+              "description": "40 o más actividades indica rendimiento óptimo"
+            }
+          }
+        },
+        "tiempo_plataforma_horas": {
+          "type": "object",
+          "properties": {
+            "critico": {
+              "type": "number",
+              "const": 15,
+              "description": "Menos de 15 horas indica riesgo crítico"
+            },
+            "medio": {
+              "type": "number",
+              "const": 20,
+              "description": "Menos de 20 horas indica riesgo medio"
+            },
+            "optimo": {
+              "type": "number",
+              "const": 100,
+              "description": "100 o más horas indica rendimiento óptimo"
+            }
+          }
+        },
+        "entregas_tarde": {
+          "type": "object",
+          "properties": {
+            "critico": {
+              "type": "integer",
+              "const": 10,
+              "description": "Más de 10 entregas tarde indica riesgo crítico"
+            },
+            "medio": {
+              "type": "integer",
+              "const": 5,
+              "description": "Más de 5 entregas tarde indica riesgo medio"
+            },
+            "optimo": {
+              "type": "integer",
+              "const": 2,
+              "description": "2 o menos entregas tarde indica rendimiento óptimo"
+            }
+          }
+        },
+        "foros_participacion": {
+          "type": "object",
+          "properties": {
+            "critico": {
+              "type": "integer",
+              "const": 1,
+              "description": "Menos de 1 participación indica riesgo crítico"
+            },
+            "medio": {
+              "type": "integer",
+              "const": 3,
+              "description": "Menos de 3 participaciones indica riesgo medio"
+            },
+            "optimo": {
+              "type": "integer",
+              "const": 8,
+              "description": "8 o más participaciones indica rendimiento óptimo"
+            }
+          }
+        },
+        "calificacion_final": {
+          "type": "object",
+          "properties": {
+            "critico": {
+              "type": "number",
+              "const": 4.0,
+              "description": "Menos de 4.0 indica riesgo crítico (desaprobado)"
+            },
+            "medio": {
+              "type": "number",
+              "const": 6.0,
+              "description": "Menos de 6.0 indica riesgo medio"
+            },
+            "optimo": {
+              "type": "number",
+              "const": 8.0,
+              "description": "8.0 o más indica rendimiento óptimo"
+            }
+          }
+        }
+      }
+    },
+    "metricas_calidad_ml": {
+      "type": "object",
+      "description": "Métricas mínimas de calidad para algoritmos de Machine Learning",
+      "properties": {
+        "clustering": {
+          "type": "object",
+          "properties": {
+            "silhouette_score_minimo": {
+              "type": "number",
+              "const": 0.4,
+              "description": "Silhouette score mínimo aceptable"
+            },
+            "k_recomendado": {
+              "type": "integer",
+              "const": 3,
+              "description": "Número de clusters recomendado (Alto, Medio, Bajo)"
+            },
+            "max_iteraciones": {
+              "type": "integer",
+              "const": 300,
+              "description": "Máximo de iteraciones para convergencia"
+            },
+            "tiempo_maximo_segundos": {
+              "type": "integer",
+              "const": 30,
+              "description": "Tiempo máximo de ejecución aceptable"
+            }
+          }
+        },
+        "regresion": {
+          "type": "object",
+          "properties": {
+            "r2_minimo": {
+              "type": "number",
+              "const": 0.6,
+              "description": "R² score mínimo aceptable"
+            },
+            "mae_maximo": {
+              "type": "number",
+              "const": 1.0,
+              "description": "Mean Absolute Error máximo aceptable"
+            },
+            "rmse_maximo": {
+              "type": "number",
+              "const": 1.5,
+              "description": "Root Mean Square Error máximo aceptable"
+            },
+            "cv_folds": {
+              "type": "integer",
+              "const": 5,
+              "description": "Número de folds para validación cruzada"
+            }
+          }
+        }
+      }
+    },
+    "ejemplos": {
+      "type": "object",
+      "description": "Ejemplos de registros válidos e inválidos",
+      "properties": {
+        "registro_valido": {
+          "type": "object",
+          "properties": {
+            "estudiante_id": {
+              "type": "string",
+              "const": "EST001"
+            },
+            "actividades_completadas": {
+              "type": "integer",
+              "const": 45
+            },
+            "tiempo_plataforma_horas": {
+              "type": "number",
+              "const": 120.5
+            },
+            "entregas_tarde": {
+              "type": "integer",
+              "const": 2
+            },
+            "foros_participacion": {
+              "type": "integer",
+              "const": 8
+            },
+            "calificacion_final": {
+              "type": "number",
+              "const": 8.5
+            }
+          }
+        },
+        "registros_invalidos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ejemplo": {
+                "type": "object"
+              },
+              "error": {
+                "type": "string"
+              }
+            }
+          },
+          "const": [
+            {
+              "ejemplo": {
+                "estudiante_id": "EST001",
+                "actividades_completadas": -5,
+                "tiempo_plataforma_horas": 120,
+                "entregas_tarde": 2,
+                "foros_participacion": 8,
+                "calificacion_final": 8.5
+              },
+              "error": "actividades_completadas no puede ser negativo"
+            },
+            {
+              "ejemplo": {
+                "estudiante_id": "EST001",
+                "actividades_completadas": 45,
+                "tiempo_plataforma_horas": 120,
+                "entregas_tarde": 2,
+                "foros_participacion": 8,
+                "calificacion_final": 12.5
+              },
+              "error": "calificacion_final debe estar entre 0 y 10"
+            },
+            {
+              "ejemplo": {
+                "estudiante_id": "",
+                "actividades_completadas": 45,
+                "tiempo_plataforma_horas": 120,
+                "entregas_tarde": 2,
+                "foros_participacion": 8,
+                "calificacion_final": 8.5
+              },
+              "error": "estudiante_id no puede estar vacío"
+            }
+          ]
+        }
+      }
+    },
+    "versionado": {
+      "type": "object",
+      "properties": {
+        "version_schema": {
+          "type": "string",
+          "const": "1.0.0"
+        },
+        "fecha_creacion": {
+          "type": "string",
+          "const": "2025-03-01"
+        },
+        "fecha_ultima_modificacion": {
+          "type": "string",
+          "const": "2025-10-23"
+        },
+        "autores": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "const": ["García, Carlos", "Moreno, Raúl"]
+        },
+        "institucion": {
+          "type": "string",
+          "const": "Instituto Superior de Formación Técnica - Córdoba"
+        }
+      }
+    }
+  }
+}
